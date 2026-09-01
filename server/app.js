@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const PORT = 5005;
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/cohort-tool-api")
+  .connect("mongodb://127.0.0.1:27017/cohort-tools-api")
   .then(x => console.log(`Connected to Database: "${x.connections[0].name}"`))
   .catch(err => console.error("Error connecting to MongoDB", err));
 
@@ -47,13 +47,30 @@ app.get("/docs", (req, res) => {
   res.sendFile(__dirname + "/views/docs.html");
 });
 
-app.get("/api/cohorts",(req, res)=>{
-  res.json(cohortsData)
-})
+// app.get("/api/cohorts",(req, res)=>{
+//   res.json(cohortsData)
+// })
+app.get("/api/cohorts", (req, res) => {
+  Cohort.find({})
+    .then((cohorts) => res.json(cohorts))
+    .catch((error) => {
+      console.error("Error while retrieving cohorts ->", error);
+      res.status(500).json({ error: "Failed to retrieve cohorts" });
+    });
+});
 
-app.get("/api/students",(req, res)=>{
-  res.json(studentsData)
-})
+// app.get("/api/students",(req, res)=>{
+//   res.json(studentsData)
+// })
+
+app.get("/api/students", (req, res) => {
+  Student.find({})
+    .then((students) => res.json(students))
+    .catch((error) => {
+      console.error("Error while retrieving students ->", error);
+      res.status(500).json({ error: "Failed to retrieve students" });
+    });
+});
 
 
 

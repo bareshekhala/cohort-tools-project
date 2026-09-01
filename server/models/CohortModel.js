@@ -1,5 +1,4 @@
-const { default: mongoose } = require("mongoose");
-const mangoose = require("mongoose");
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const cohortSchema = new Schema({
