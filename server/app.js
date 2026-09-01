@@ -14,8 +14,9 @@ mongoose
 // STATIC DATA
 // Import the provided files with JSON data of students and cohorts here:
 // ...
-const cohortsData = require("./cohorts.json")
-const studentsData = require("./students.json")
+
+const Cohort = require("./models/CohortModel");
+const Student = require("./models/StudentsModel");
 
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
