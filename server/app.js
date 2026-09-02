@@ -102,14 +102,76 @@ app.delete("/api/cohorts/:cohortId", async (req, res) => {
   }
 });
 
+// Create a student
+app.post("/api/students", async (req, res) => {
+  try {
+    const response = await Student.create(req.body);
+    res.status(201).json(response);
+  } catch (error) {
+    res.status(500).json("error in student creation");
+  }
+});
+
+// Get all students
 app.get("/api/students", (req, res) => {
   Student.find({})
+    .populate("cohort")
     .then((students) => res.json(students))
     .catch((error) => {
       console.error("Error while retrieving students ->", error);
       res.status(500).json({ error: "Failed to retrieve students" });
     });
 });
+
+// Get all students in a specific cohort
+app.get("/api/students/cohort/:cohortId", async (req, res) => {
+  try {
+    const response = await Student.find({ cohort: req.params.cohortId })
+    .populate("cohort");
+    res.status(201).json(response);
+  }catch(error){
+    res.status(500).json("error in finding a specific student");
+  }
+});
+
+// Get a specific student
+app.get("/api/students/:studentId", async (req, res) => {
+  try {
+    const response = await Student.findById(req.params.studentId)
+    .populate("cohort");
+    res.status(201).json(response);
+  }catch(error){
+    res.status(500).json("error in finding a specific student");
+  }
+});
+
+// Update a specific student
+app.put("/api/students/:studentId", async (req, res) => {
+  try {
+    const response = await Student.findByIdAndUpdate(
+      req.params.studentId,
+      req.body,
+      {
+        returnDocument: "after",
+        runValidators: true,
+      },
+    );
+    res.status(201).json(response);
+  }catch(error){
+    res.status(500).json("error in updating a specific student");
+  }
+});
+
+// Delete a specific student
+app.delete("/api/students/:studentId", async (req, res) => {
+  try {
+    await Student.findByIdAndDelete(req.params.studentId);
+    res.sendStatus(204);
+  }catch(error){
+    res.status(500).json("error in deleting a specific student");
+  }
+});
+
 
 // START SERVER
 app.listen(PORT, () => {
