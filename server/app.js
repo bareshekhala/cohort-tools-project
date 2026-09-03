@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const { errorHandler, notFoundHandler } = require("./error-handling.js")
 
 const PORT = 5005;
 
@@ -70,7 +71,7 @@ app.get("/api/cohorts/:cohortId", async (req, res) => {
     const response = await Cohort.findById(req.params.cohortId);
     res.status(201).json(response);
   } catch (error) {
-    res.status(500).json("error in finding a specific cohort");
+    res.status(500).json("Cohort Id does not exit.");
   }
 });
 
@@ -88,7 +89,7 @@ app.put("/api/cohorts/:cohortId", async (req, res) => {
     );
     res.status(201).json(response);
   } catch (error) {
-    res.status(500).json("error in updating a  cohort");
+    next(error)
   }
 });
 
@@ -113,40 +114,39 @@ app.post("/api/students", async (req, res) => {
 });
 
 // Get all students
-app.get("/api/students", (req, res) => {
+app.get("/api/students", (req, res, next) => {
   Student.find({})
     .populate("cohort")
-    .then((students) => res.json(students))
+    .then((students) => {res.json(students)})
     .catch((error) => {
-      console.error("Error while retrieving students ->", error);
-      res.status(500).json({ error: "Failed to retrieve students" });
+      next(error)
     });
 });
 
 // Get all students in a specific cohort
-app.get("/api/students/cohort/:cohortId", async (req, res) => {
+app.get("/api/students/cohort/:cohortId", async (req, res, next) => {
   try {
     const response = await Student.find({ cohort: req.params.cohortId })
     .populate("cohort");
     res.status(201).json(response);
   }catch(error){
-    res.status(500).json("error in finding a specific student");
+   next(error)
   }
 });
 
 // Get a specific student
-app.get("/api/students/:studentId", async (req, res) => {
+app.get("/api/students/:studentId", async (req, res, next) => {
   try {
     const response = await Student.findById(req.params.studentId)
     .populate("cohort");
     res.status(201).json(response);
   }catch(error){
-    res.status(500).json("error in finding a specific student");
+    next(error);
   }
 });
 
 // Update a specific student
-app.put("/api/students/:studentId", async (req, res) => {
+app.put("/api/students/:studentId", async (req, res, next) => {
   try {
     const response = await Student.findByIdAndUpdate(
       req.params.studentId,
@@ -158,20 +158,22 @@ app.put("/api/students/:studentId", async (req, res) => {
     );
     res.status(201).json(response);
   }catch(error){
-    res.status(500).json("error in updating a specific student");
+    next(error);
   }
 });
 
 // Delete a specific student
-app.delete("/api/students/:studentId", async (req, res) => {
+app.delete("/api/students/:studentId", async (req, res, error) => {
   try {
     await Student.findByIdAndDelete(req.params.studentId);
     res.sendStatus(204);
   }catch(error){
-    res.status(500).json("error in deleting a specific student");
+    next(error)
   }
 });
 
+app.use(errorHandler)
+app.use(notFoundHandler)
 
 // START SERVER
 app.listen(PORT, () => {
