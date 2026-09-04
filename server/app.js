@@ -5,8 +5,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const { errorHandler, notFoundHandler } = require("./error-handling.js")
 
-const PORT = 5005;
+const PORT = 8008;
 
+try {
+  process.loadEnvFile()
+} catch(error) {
+  console.warn(".env file not found, using default environment values")
+}
 mongoose
   .connect("mongodb://127.0.0.1:27017/cohort-tools-api")
   .then((x) => console.log(`Connected to Database: "${x.connections[0].name}"`))
@@ -77,7 +82,7 @@ app.get("/api/cohorts/:cohortId", async (req, res) => {
 
 //updates a specific cohort
 
-app.put("/api/cohorts/:cohortId", async (req, res) => {
+app.put("/api/cohorts/:cohortId", async (req, res, next) => {
   try {
     const response = await Cohort.findByIdAndUpdate(
       req.params.cohortId,
@@ -163,7 +168,7 @@ app.put("/api/students/:studentId", async (req, res, next) => {
 });
 
 // Delete a specific student
-app.delete("/api/students/:studentId", async (req, res, error) => {
+app.delete("/api/students/:studentId", async (req, res, next) => {
   try {
     await Student.findByIdAndDelete(req.params.studentId);
     res.sendStatus(204);
@@ -171,6 +176,12 @@ app.delete("/api/students/:studentId", async (req, res, error) => {
     next(error)
   }
 });
+
+const authRouter = require("./routes/auth.routes.js")
+app.use("/api/auth", authRouter)
+
+const userRouter = require("./routes/user.routes.js")
+app.use("/api", userRouter)
 
 app.use(errorHandler)
 app.use(notFoundHandler)
